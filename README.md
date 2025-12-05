@@ -31,6 +31,10 @@ make build_em
 ```
 The target emits `docs/mp3tags.js` and `docs/mp3tags.wasm`, which power the browser UI.
 
+## Demo - Web Preview
+
+![Demo 1](docs/demo1.png "Demo")
+
 ## Running the Demos
 - **CLI**: After building, run the generated binary (for example, `docs/mp3tags`) from a terminal. Update the hard-coded path inside `src/main.cpp` before rebuilding to inspect a specific file.
 - **Web UI**: Serve the `docs/` directory (e.g., `python -m http.server 8000` from the project root) and open `http://localhost:8000/docs/`. The page loads entirely in the browser; drag any local `.mp3` to view its tag data.
