@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MP3 Tags Reader</title>
+  <style>
+    * {
+      font-family: Arial, sans-serif;
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+    }
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    #demo {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      display: flex;
+      gap: 1rem;
+      flex-direction: column;
+      width: 400px;
+    }
+    #file {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: center;
+      justify-content: center;
+      background-color: white;
+    }
+    #file label {
+      display: flex;
+      width: 100%;
+      cursor: pointer;
+      text-align: center;
+      margin-bottom: 0.5rem;
+      border: 2px dashed #007bff;
+      padding: 2rem;
+      border-radius: 4px;
+      padding: 2rem;
+      transition: background-color 0.3s, border-color 0.3s;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    #file label:hover {
+      background-color: #e9f5ff;
+      border-color: #0056b3;
+    }
+    #file label span {
+      background-color: #007bff;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 9rem;
+      height: 3rem;
+    }
+    #file label span:hover {
+      background-color: #0056b3;
+    }
+    #fileName {
+      font-size: 0.9rem;
+      color: #555;
+      text-align: center;
+    }
+    #output {
+      display: none;
+      margin-top: 20px;
+      padding: 10px;
+      border-radius: 4px;
+      width: 400px;
+      min-height: 100px;
+      overflow-wrap: break-word;
+    }
+    #output h4 {
+      margin-bottom: 10px;
+    }
+    #output p {
+      margin: 5px 0;
+    }
+    #output strong {
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div id="demo">
+    <h3 style="background-color: white;">MP3 Tags Reader</h3>
+    <div id="file">
+      <label for="fileInput">
+        <span>Choose a file</span>
+      </label>
+      <input type="file" id="fileInput" style="display: none;" accept=".mp3">
+      <span id="fileName">No file chosen</span>
+    </div>
+  </div>
+  <div id="output"></div>
+  <script src="mp3tags.js"></script>
+  <script>
+    Module.onRuntimeInitialized = () => {
+      const fileInput = document.getElementById('fileInput');
+      fileInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        document.getElementById('fileName').textContent = file ? file.name : 'No file chosen';
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const arraybuffer = e.target.result;
+          const byteArray = new Uint8Array(arraybuffer);
+          const numberOfBytes = byteArray.length * byteArray.BYTES_PER_ELEMENT;
+          const ptr = Module._malloc(numberOfBytes);
+          const dataHeap = new Uint8Array(Module.HEAPU8.buffer, ptr, numberOfBytes);
+          dataHeap.set(byteArray);
+          const data = JSON.parse(Module.ccall('ReadMP3_EM', 'string', ['number', 'number'], [ptr, numberOfBytes]));
+          document.getElementById('output').style.display = 'block';
+          document.getElementById('output').innerHTML = `
+            <h4>Title: ${data.title || 'Unknown Title'}</h4>
+            <p><strong>Artist:</strong> ${data.artist || 'Unknown Artist'}</p>
+            <p><strong>Album:</strong> ${data.album || 'Unknown Album'}</p>
+            <p><strong>Year:</strong> ${data.year || 'Unknown Year'}</p>
+            <p><strong>Genre:</strong> ${data.genre || 'Unknown Genre'}</p>
+            <p><strong>Track:</strong> ${data.track || 'Unknown Track'}</p>
+            <p><strong>Comment:</strong> ${data.comment || 'No Comment'}</p>
+          `;
+          Module._free(ptr);
+        };
+        reader.readAsArrayBuffer(file);
+      });
+    };
+  </script>
+</body>
+</html>
