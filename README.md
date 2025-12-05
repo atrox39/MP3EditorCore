@@ -1,6 +1,6 @@
-# MP3EditorWb
+# MP3EditorCore
 
-MP3EditorWb is a lightweight C++ toolkit for inspecting MP3 metadata. It focuses on reading ID3 tags directly from binary data and comes with a WebAssembly build that powers a simple browser UI for quickly checking track information without uploading files to a server.
+MP3EditorCore is a lightweight C++ toolkit for inspecting MP3 metadata. It focuses on reading ID3 tags directly from binary data and comes with a WebAssembly build that powers a simple browser UI for quickly checking track information without uploading files to a server.
 
 ## Features
 - Detects MP3 files by extension and validates embedded ID3 headers.
